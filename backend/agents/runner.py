@@ -3,12 +3,23 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.agents import Agent
 from google.genai.types import Content, Part
 
-# Estado global — persiste mientras uvicorn esté corriendo
+# ── Langfuse via OpenTelemetry ─────────────────────────────────────────────
+from langfuse import get_client
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+
+langfuse = get_client()
+
+if langfuse.auth_check():
+    GoogleADKInstrumentor().instrument()
+    print("Langfuse conectado")
+else:
+    print("Langfuse: credenciales inválidas, trazabilidad desactivada")
+
+# ── Estado global ──────────────────────────────────────────────────────────
 _session_services: dict[str, InMemorySessionService] = {}
 _runners: dict[str, Runner] = {}
 
 async def run_agent(agent: Agent, agent_id: str, message: str, session_id: str) -> str:
-    # Reusar runner existente o crear uno nuevo
     if agent_id not in _runners:
         session_service = InMemorySessionService()
         runner = Runner(
@@ -22,7 +33,6 @@ async def run_agent(agent: Agent, agent_id: str, message: str, session_id: str) 
     session_service = _session_services[agent_id]
     runner = _runners[agent_id]
 
-    # Siempre intentar crear la sesión — si ya existe la ignoramos
     try:
         await session_service.create_session(
             app_name=agent_id,
@@ -30,7 +40,7 @@ async def run_agent(agent: Agent, agent_id: str, message: str, session_id: str) 
             session_id=session_id
         )
     except Exception:
-        pass  # ya existe, no hay problema
+        pass
 
     user_message = Content(role="user", parts=[Part(text=message)])
 
@@ -44,4 +54,5 @@ async def run_agent(agent: Agent, agent_id: str, message: str, session_id: str) 
             response_text = event.content.parts[0].text
             break
 
+    langfuse.flush()
     return response_text
