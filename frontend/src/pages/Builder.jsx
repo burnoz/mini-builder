@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bot, Wrench, Trash2, MessageSquare, Plus, Link } from 'lucide-react'
-import { createAgent, listAgents, updateAgent, deleteAgent } from '../lib/api'
+import { Bot, Wrench, Trash2, MessageSquare, Plus, Link, Upload, Loader2 } from 'lucide-react'
+import { createAgent, listAgents, updateAgent, deleteAgent, ingestPdf } from '../lib/api'
 import '../styles/builder.css'
+// ... rest of imports
 
 const MODELS = [
     { value: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite' },
@@ -68,7 +69,29 @@ export default function Builder() {
     const [config, setConfig] = useState(defaultConfig())
     const [editingId, setEditingId] = useState(null)
     const [toast, setToast] = useState(null)
+    const [isUploading, setIsUploading] = useState(false)
     const toolConfigRefs = useRef({})
+// ... rest of state and effects
+
+    async function handleFileUpload(e) {
+        const file = e.target.files[0]
+        if (!file) return
+        if (file.type !== 'application/pdf') {
+            return showToast('Solo se admiten archivos PDF', 'error')
+        }
+
+        setIsUploading(true)
+        try {
+            await ingestPdf(file)
+            showToast('Documento indexado correctamente')
+        } catch (err) {
+            console.error(err)
+            showToast('Error al indexar documento', 'error')
+        } finally {
+            setIsUploading(false)
+            e.target.value = '' // Reset input
+        }
+    }
     const previousToolsRef = useRef([])
     const navigate = useNavigate()
 
@@ -278,6 +301,31 @@ export default function Builder() {
                                             value={config.tool_configs.rag?.top_k ?? ''}
                                             onChange={e => setToolConfig('rag', 'top_k', e.target.value)}
                                         />
+                                    </div>
+                                    <div className="field">
+                                        <label>Cargar documentos (PDF)</label>
+                                        <div className="upload-zone">
+                                            <input
+                                                type="file"
+                                                id="file-upload"
+                                                accept=".pdf"
+                                                onChange={handleFileUpload}
+                                                style={{ display: 'none' }}
+                                                disabled={isUploading}
+                                            />
+                                            <button
+                                                className="btn btn-secondary upload-btn"
+                                                onClick={() => document.getElementById('file-upload').click()}
+                                                disabled={isUploading}
+                                            >
+                                                {isUploading ? (
+                                                    <Loader2 size={14} className="spin" style={{ marginRight: 6 }} />
+                                                ) : (
+                                                    <Upload size={14} style={{ marginRight: 6 }} />
+                                                )}
+                                                {isUploading ? 'Indexando...' : 'Subir PDF'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

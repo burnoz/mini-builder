@@ -38,7 +38,7 @@ export default function Chat() {
       const { data } = await sendMessage(agentId, { message: text, session_id: sessionId.current })
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: '❌ Error al obtener respuesta.' }])
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error al obtener respuesta.' }])
     } finally {
       setLoading(false)
     }
@@ -65,14 +65,14 @@ export default function Chat() {
         {messages.map((m, i) => (
           <div key={i} className={`message ${m.role}`}>
             <div className="message__avatar">
-              {m.role === 'user' ? '👤' : '🤖'}
+              {m.role === 'user' ? 'TU' : 'AI'}
             </div>
             <div className="message__bubble">{m.content}</div>
           </div>
         ))}
         {loading && (
           <div className="message assistant">
-            <div className="message__avatar">🤖</div>
+            <div className="message__avatar">AI</div>
             <div className="message__bubble">
               <div className="message__typing">
                 <span /><span /><span />

@@ -1,23 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@400;500&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface2: #22263a;
-  --border: #2e3350;
-  --accent: #6366f1;
-  --accent-hover: #4f52d4;
-  --danger: #ef4444;
-  --text: #e2e8f0;
-  --text-muted: #64748b;
-  --radius: 10px;
-  --font: 'Inter', system-ui, sans-serif;
+  --bg: #ebf0f2;
+  --surface: #ffffff;
+  --surface2: #f4f7f8;
+  --surface3: #fcfcfc;
+  --border: #cfd2d3;
+  --accent: #eb0029;
+  --accent-hover: #e30028;
+  --danger: #ff671b;
+  --text: #323e48;
+  --text-muted: #5b6670;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow-sm: 0 2px 10px rgba(50, 62, 72, 0.08);
+  --font-brand: 'Gotham', 'Montserrat', sans-serif;
+  --font-body: 'Roboto', system-ui, sans-serif;
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 10% 10%, #ffffff 0%, rgba(255, 255, 255, 0) 26%),
+    linear-gradient(165deg, #ebf0f2 0%, #f4f7f8 52%, #fcfcfc 100%);
   color: var(--text);
-  font-family: var(--font);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
   min-height: 100vh;
 }
 
@@ -25,23 +35,29 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
-  font-family: var(--font);
+  font-family: var(--font-brand);
 }
 
 input, textarea, select {
-  font-family: var(--font);
+  font-family: var(--font-body);
   outline: none;
   border: 1px solid var(--border);
-  background: var(--surface2);
+  background: var(--surface);
   color: var(--text);
   border-radius: var(--radius);
-  padding: 8px 12px;
+  padding: 14px 15px;
   width: 100%;
   font-size: 14px;
+  min-height: 50px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(235, 0, 41, 0.12);
 }
 
-textarea { resize: vertical; }
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}

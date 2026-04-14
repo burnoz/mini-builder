@@ -1,15 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from supabase import create_client
 from agents.builder import build_agent
 from agents.runner import run_agent
+from helpers.ingest import upload_and_index_pdf
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
 app = FastAPI()
+
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 app.add_middleware(
@@ -19,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# ── Schemas ────────────────────────────────────────────────────────────────
 
 class AgentConfig(BaseModel):
     name: str
@@ -32,7 +33,6 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str
 
-# ── Agents ─────────────────────────────────────────────────────────────────
 
 @app.post("/agents", status_code=201)
 async def create_agent(config: AgentConfig):
@@ -61,7 +61,11 @@ async def update_agent(agent_id: str, config: AgentConfig):
 async def delete_agent(agent_id: str):
     supabase.table("agents").delete().eq("id", agent_id).execute()
 
-# ── Chat ───────────────────────────────────────────────────────────────────
+@app.post("/ingest/pdf")
+async def ingest_pdf(file: UploadFile = File(...)):
+    content = await file.read()
+    upload_and_index_pdf(content, file.filename)
+    return {"message": f"Archivo '{file.filename}' indexado correctamente"}
 
 @app.post("/agents/{agent_id}/chat")
 async def chat(agent_id: str, req: ChatRequest):

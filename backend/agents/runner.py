@@ -3,7 +3,7 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.agents import Agent
 from google.genai.types import Content, Part
 
-# ── Langfuse via OpenTelemetry ─────────────────────────────────────────────
+# Langfuse via OpenTelemetry
 from langfuse import get_client
 from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 
@@ -15,7 +15,7 @@ if langfuse.auth_check():
 else:
     print("Langfuse: credenciales inválidas, trazabilidad desactivada")
 
-# ── Estado global ──────────────────────────────────────────────────────────
+# Estado global
 _session_services: dict[str, InMemorySessionService] = {}
 _runners: dict[str, Runner] = {}
 
